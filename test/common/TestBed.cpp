@@ -98,6 +98,8 @@ namespace RcclUnitTesting
     {
       for (auto i = 0; i < deviceIdsPerProcess[childId].size(); ++i)
       {
+        // if one process per rank this map will be 0->0,1->1....
+        // else 0->{0,1,2,3,4,5...}
         this->rankToChildMap.push_back(childId);
         this->rankToDeviceMap.push_back(deviceIdsPerProcess[childId][i]);
         ++this->numActiveRanks;
@@ -109,7 +111,7 @@ namespace RcclUnitTesting
     PIPE_WRITE(0, getIdCmd);
 
     // Receive back unique ID from first rank
-    ncclUniqueId id;
+    ncclUniqueId id; // "ip:port"
     PIPE_READ(0, id);
     PIPE_CHECK(0);
 
@@ -125,6 +127,7 @@ namespace RcclUnitTesting
       PIPE_WRITE(childId, id);
 
       // Send total number of ranks to child process
+      // one process mode =1, multi= ranks
       PIPE_WRITE(childId, this->numActiveRanks);
 
       // Send the rank offset for this child process
@@ -134,6 +137,7 @@ namespace RcclUnitTesting
       PIPE_WRITE(childId, numCollectivesInGroup);
 
       // Send the GPUs this child uses
+      // one process is 1
       int const numGpus = deviceIdsPerProcess[childId].size();
       PIPE_WRITE(childId, numGpus);
       for (int i = 0; i < numGpus; i++)

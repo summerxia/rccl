@@ -132,7 +132,7 @@ namespace RcclUnitTesting
     this->collArgs.resize(numGpus);
     for (int i = 0; i < numGpus; i++)
     {
-      PIPE_READ(this->deviceIds[i]);
+      PIPE_READ(this->deviceIds[i]);// equal to rankid 
       this->collArgs[i].clear();
       this->collArgs[i].resize(numCollectivesInGroup);
     }
@@ -144,6 +144,7 @@ namespace RcclUnitTesting
     // Initialize within a group call to avoid deadlock when using multiple ranks per child
     ErrCode status = TEST_SUCCESS;
     CHILD_NCCL_CALL(ncclGroupStart(), "ncclGroupStart");
+    // if one process per rank numGpus = 1
     for (int localRank = 0; localRank < numGpus; ++localRank)
     {
       int const globalRank = this->rankOffset + localRank;
