@@ -132,7 +132,7 @@ inline __device__ void DataSourceOrSink(const int w, const int nw, const int t,
 }
 
 __global__ void DataSinkKernel(const uint64_t end, Pack128* data, uint64_t* recv_head, uint64_t* recv_tail, uint64_t* mismatch, uint64_t *sink_cycle, uint64_t *sink_bytes) {
-  const int N = DEFAULT_BUFFSIZE*SLICE_STEPS/NCCL_STEPS/sizeof(Pack128);
+  const int N = DEFAULT_BUFFSIZE*SLICE_STEPS/NCCL_STEPS/sizeof(Pack128);//2M * 4 / 8 / 128 = 8
   Pack128* recvBuff[NCCL_STEPS];
   const int tid = threadIdx.x;
   uint64_t tail = LOAD(recv_tail);
@@ -304,7 +304,7 @@ public:
   bool netProxy() {
     char* localBuff = use_gdr_read ? sendDevBuffer : sendHostBuffer;
     void* mhandle = use_gdr_read ? sendDevHandle : sendHostHandle;
-    int stepSize = sendBuffSize / NCCL_STEPS;
+    int stepSize = sendBuffSize / NCCL_STEPS; // 4MiB / 8
     int sliceSize = stepSize * args.sliceSteps;
     if (!runSend) return runSend;
     if (args.head < args.end) {
